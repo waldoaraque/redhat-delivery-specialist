@@ -1,0 +1,44 @@
+apiVersion: v1
+items:
+- apiVersion: route.openshift.io/v1
+  kind: Route
+  metadata:
+    annotations:
+      openshift.io/host.generated: "true"
+    creationTimestamp: "2021-02-10T21:08:17Z"
+    labels:
+      app: green
+      app.kubernetes.io/component: green
+      app.kubernetes.io/instance: green
+    name: bluegreen
+    namespace: c184-bluegreen
+    resourceVersion: "548950687"
+    selfLink: /apis/route.openshift.io/v1/namespaces/c184-bluegreen/routes/bluegreen
+    uid: 4816468a-1f05-4c3a-8efa-3e72fba034ac
+  spec:
+    alternateBackends:
+    - kind: Service
+      name: blue
+      weight: 50
+    host: bluegreen-c184-bluegreen.apps.shared-na4.na4.openshift.opentlc.com
+    port:
+      targetPort: 8080-tcp
+    to:
+      kind: Service
+      name: green
+      weight: 50
+    wildcardPolicy: None
+  status:
+    ingress:
+    - conditions:
+      - lastTransitionTime: "2021-02-10T21:08:18Z"
+        status: "True"
+        type: Admitted
+      host: bluegreen-c184-bluegreen.apps.shared-na4.na4.openshift.opentlc.com
+      routerCanonicalHostname: apps.shared-na4.na4.openshift.opentlc.com
+      routerName: default
+      wildcardPolicy: None
+kind: List
+metadata:
+  resourceVersion: ""
+  selfLink: ""
