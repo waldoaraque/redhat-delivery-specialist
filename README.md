@@ -548,3 +548,81 @@ strategy:
     pre: {}  //Executes any pre lifecycle hook.
     mid: {}  //Executes any mid lifecycle hook.
     post: {} //Executes any post lifecycle hook.
+    
+This approach is called blue/green deployment and it uses two versions of the application running simultaneously. First, you use the Route object to point to the current version. Then you start the new version and switch the Route to the new pods. After you test the new version and are satisfied with it, you can scale down the previous one and delete that Deployment.
+
+create a Route using the oc expose command to make it visible from outside the cluster. You use the --name parameter to specify the Route’s name. This Route serves both the blue and green Deployments, so call it bluegreen.
+
+Create a Route specifying the --name parameter bluegreen:
+
+$ oc expose svc green --name=bluegreen
+route.route.openshift.io/bluegreen exposed
+Discover the URL so that you can access this application from outside the cluster:
+
+$ oc get route
+NAME        HOST/PORT                                                           PATH   SERVICES   PORT       TERMINATION   WILDCARD
+bluegreen   bluegreen-55bb-bluegreen.apps.shared-na4.na4.openshift.opentlc.com          green      8080-tcp                 None
+Use curl to check the version of the deployed application, using the URL of your actual application’s Route from the previous command’s output. Or, better, create an environment variable for the Route:
+
+$ export ROUTE=$(oc get route bluegreen -o jsonpath='{.spec.host}')
+$ curl $ROUTE/version
+0.4
+
+This time you do not need to run oc expose to expose the Service because you already have an external Route pointing to the green Service.
+
+In this section, you switch the Route to the blue Service. There are a couple ways to do this. First, you use the oc edit command as it is the easiest way and helps you to find the right place in the Route’s manifest. Later, you use the oc patch command to perform the switch. Using oc patch is useful if you want to automate switching between blue and green deployments.
+
+ oc patch command to switch between deployments. This is useful if you want to automate the process or if you want to include this step in a CI/CD pipeline.
+
+Switch it back to green using the command line by editing the route and changing the service name
+
+$ oc patch route/bluegreen -p '{"spec":{"to":{"name":"green"}}}'
+
+route.route.openshift.io/bluegreen patched
+Verify that the version reverted to 0.4:
+
+$ curl $ROUTE/version
+0.4
+
+
+You may have noticed the weight: parameter in the Route’s manifest. In blue/green scenarios, you switch the Route from one backing Service to another with a weight equal to 100%. The weight parameter is particularly suited to canary deployments because it controls the amount of traffic, such as five percent, to send to either of the two active deployments.
+
+It is also used in A/B testing to split traffic equally so that you can compare the response rate or some other metric.
+
+NOTE:  alternateBackends is a YAML list whose elements start with - (hyphen).
+
+You can achieve the same results using the command line. Imagine you have completed your testing and want to switch 90 percent of the traffic to the 0.5 version but leave 10 percent on the 0.4 version just in case.
+
+Set the Route back-end weights:
+
+$ oc set route-backends bluegreen blue=9 green=1
+route.route.openshift.io/bluegreen backends updated 
+
+ssh waaraque-atsistemas.com@studentvm.c184.example.opentlc.com
+
+echo ${GUID}
+
+wget --no-check-certificate https://downloads-openshift-console.apps.shared-na4.na4.openshift.opentlc.com/amd64/linux/oc
+
+sudo mv oc /usr/local/bin/oc
+
+sudo chmod a+x /usr/local/bin/oc
+
+oc login -h
+
+oc login -u OPENTLC_USERID https://api.shared-na4.na4.openshift.opentlc.com:6443
+
+
+oc version
+
+oc whoami
+
+oc whoami --show-server
+
+oc whoami --show-token #interesting
+
+oc whoami --show-context
+
+cat $HOME/.kube/config
+
+export KUBECONFIG=$HOME/.kube/new-config
